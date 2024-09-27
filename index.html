@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+
+<head>
+    <title>High Voltage Simulator</title>
+    <link rel="icon" type="image/png" href="favicon.png">
+    <meta property="og:title" content="High Voltage Simulator" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://f300xen.github.io/highvoltage/" />
+    <meta property="og:image" content="https://game-assets.snap.fan/card_variant_images/Electro_01-68c4744cbbdf8e7cdaeae53b8892ec7861c216d1419424f3fb63676d5649b75f.webp" />
+    <style>
+        body {
+            background-color: gray;
+            margin: 0;
+            padding: 0;
+        }
+
+        img {
+            height: auto;
+            width: 6rem;
+        }
+
+        img.location {
+            position: relative;
+            width: 8rem;
+            margin-left: -1rem;
+            z-index: 8000;
+        }
+
+        .draws {
+            width: auto;
+            background-color: orange;
+            font-family: sans-serif;
+            display: flex;
+            justify-content: center;
+        }
+
+        .draws div {
+            margin: 0;
+            padding: .5rem 0;
+            width: 6rem;
+            display: inline-block;
+            clear: none;
+            text-align: center;
+        }
+
+	.draws div.e {
+		width: 1rem;
+		height: 1rem;
+		padding: 1rem;	
+		color: white;
+		font-style: italic;
+		font-weight: 800;
+		text-align: center;
+		text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
+		background-image: url(e.png);
+		background-size: 100% 100%;
+		background-position: 1px 1px;
+	}
+
+        .mull {
+            background-color: rgba(200, 200, 200, 0.5);
+        }
+
+        .t1 {
+            background-color: rgba(180, 180, 180, .5);
+        }
+
+        .t2 {
+            background-color: rgba(160, 160, 160, .5);
+        }
+
+        .t3 {
+            background-color: rgba(140, 140, 140, .5);
+        }
+
+        .t4 {
+            background-color: rgba(120, 120, 120, .5);
+        }
+
+        .t5 {
+            background-color: rgba(100, 100, 100, .5);
+        }
+
+        .t6 {
+            background-color: rgba(80, 80, 80, .5);
+        }
+
+        .deck {
+            background-color: rgba(0, 0, 0, .5);
+            display: flex;
+            width: auto;
+            flex-flow: wrap;
+            align-items: center;
+            justify-content: left;
+            padding: 1rem;
+            margin: auto;
+        }
+
+        .deck img {
+            width: 5rem;
+        }
+
+        hr {
+            width: 100%:
+        }
+
+        .editor {
+            width: auto;
+            background-color: darkorange;
+            display: flex;
+            padding: 1rem;
+            align-content: center;
+            align-items: center;
+            justify-content: center;
+            flex-grow: 1;
+        }
+
+        .editor button {
+            padding: .5rem 1rem;
+            margin: .5rem;
+            display: block;
+        }
+
+        .editor textarea {
+            padding: .25rem .5rem;
+            margin: .5rem;
+            min-height: 12rem;
+            display: block;
+        }
+
+        .randoms {
+            display: flex;
+            padding: 1rem;
+            margin: auto;
+        }
+
+        .randoms img {
+            margin-right: -1rem;
+        }
+
+        .randoms span img {
+            width: 5rem;
+        }
+
+    </style>
+</head>
+
+<body>
+    <main>
+        <div class="draws">
+            <div class="mull">Opener</div>
+            <div class="t1">Turn 1</div>
+            <div class="t2">Turn 2</div>
+            <div class="t3">Turn 3</div>
+            <div class="editor">
+                <button onclick="Regenerate()">Regenerate</button>
+                <textarea id="decklist" placeholder="Your decklist">
+Ebony Maw
+Cassandra
+Morph
+Copycat
+Jubilee
+Iron Lad
+Wiccan
+Darkhawk
+Klaw
+Blink
+Leader
+Dr. Doom</textarea>
+            </div>
+        </div>
+        <div class="deck"></div>
+        <div class="randoms">
+            <div class="agent13">
+                <img height='96' width='96' src='https://static.marvelsnap.pro/cards/Agent13-legendary.webp'>
+                <span>
+                </span>
+            </div>
+            <div class="maria">
+                <img height='96' width='96' src='https://static.marvelsnap.pro/cards/MariaHill-legendary.webp'>
+                <span>
+                </span>
+            </div>
+            <div class="valentina">
+                <img height='96' width='96' src='https://static.marvelsnap.pro/cards/Valentina-legendary.webp'>
+                <span></span>
+            </div>
+            <div class="coulson">
+                <img height='96' width='96' src='https://static.marvelsnap.pro/cards/AgentCoulson-legendary.webp'>
+                <span>
+                </span>
+            </div>
+            <div class="nickfury">
+                <img height='96' width='96' src='https://static.marvelsnap.pro/cards/NickFury-legendary.webp'>
+                <span></span>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const cards = ["Abomination", "Absorbing Man", "Adam Warlock", "Aero", "Agatha Harkness", "Agent 13", "Agent Coulson", "Alioth", "America Chavez", "Angel", "Angela", "Annihilus", "Ant Man", "Apocalypse", "Armor", "Arnim Zola", "Attuma", "Baron Mordo", "Baron Zemo", "Bast", "Beast", "Beta Ray Bill", "Bishop", "Black Bolt", "Black Cat", "Black Knight", "Black Panther", "Black Swan", "Black Widow", "Blade", "Blob", "Blue Marvel", "Brood", "Bucky Barnes", "Cable", "Caiera", "Cannonball", "Captain America", "Captain Marvel", "Carnage", "Cerebro", "Cloak", "Colleen Wing", "Colossus", "Corvus Glaive", "Cosmo", "Crossbones", "Crystal", "Cull Obsidian", "Cyclops", "Dagger", "Daken", "Daredevil", "Darkhawk", "Dazzler", "Deadpool", "Death", "Deathlok", "Debrii", "Destroyer", "Devil Dinosaur", "Dr. Doom", "Doctor Octopus", "Doctor Strange", "Domino", "Dracula", "Drax", "Ebony Maw", "Echo", "Electro", "Elektra", "Elsa Bloodstone", "Enchantress", "Falcon", "Forge", "Galactus", "Gambit", "Gamora", "Ghost", "Ghost Rider", "Ghost-Spider", "Giganto", "Gladiator", "Goose", "Grand Master", "Green Goblin", "Groot", "Havok", "Hawkeye", "Hazmat", "Heimdall", "Hela", "Helicarrier", "Hellcow", "Hercules", "High Evolutionary", "Hit-Monkey", "Hobgoblin", "Hope Summers", "Howard The Duck", "Hulk", "Hulkbuster", "Human Torch", "Iceman", "Invisible Woman", "Iron Fist", "Iron Lad", "Iron Man", "Ironheart", "Jane Foster", "Jean Grey", "Jeff", "Jessica Jones", "Jubilee", "Juggernaut", "Ka-Zar", "Kang", "Killmonger", "Kingpin", "Kitty Pryde", "Klaw", "Knull", "Korg", "Kraven", "Lady Deathstrike", "Lady Sif", "Leader", "Leech", "Legion", "Lizard", "Lockjaw", "Loki", "Luke Cage", "M'Baku", "M.o.d.o.k.", "Magik", "Magneto", "Man-Thing", "Mantis", "Maria Hill", "Martyr", "Master Mold", "Maximus", "Medusa", "Miek", "Miles Morales", "Mirage", "Mr. Fantastic", "Mr. Negative", "Mr. Sinister", "Misty Knight", "Mobius M. Mobius", "Mockingbird", "Mojo", "Moon Girl", "Moon Knight", "Morbius", "Morph", "Ms. Marvel", "Multiple Man", "Mysterio", "Mystique", "Nakia", "Namor", "Nebula", "Negasonic Teenage Warhead", "Nick Fury", "Nico Minoru", "Nightcrawler", "Nimrod", "Nova", "Odin", "Okoye", "Omega Red", "Onslaught", "Orka", "Patriot", "The Phoenix Force", "Pixie", "Polaris", "Professor X", "Proxima Midnight", "Psylocke", "Punisher", "Quake", "Quicksilver", "Quinjet", "Ravonna Renslayer", "Red Guardian", "Red Hulk", "Red Skull", "Rescue", "Rhino", "Rocket Raccoon", "Rockslide", "Rogue", "Ronan", "Sabretooth", "Sandman", "Sauron", "Scarlet Witch", "Scorpion", "Sebastian Shaw", "Selene", "Sentinel", "Sentry", "Sera", "Shadow King", "Shang-Chi", "Shanna", "She-Hulk", "Shocker", "Shuri", "Silk", "Silver Samurai", "Silver Surfer", "Skaar", "Snowguard", "Spectrum", "Spider-Ham", "Spider-Man", "Spider-Man 2099", "Spider-Woman", "Squirrel Girl", "Star-Lord", "Stature", "Stegron", "Storm", "Strong Guy", "Sunspot", "Super-Skrull", "Supergiant", "Swarm", "Sword Master", "Taskmaster", "Thanos", "The Collector", "Hood", "Infinaut", "Living Tribunal", "TheThing", "Thor", "Titania", "Typhoid Mary", "U.S. Agent", "Uatu", "Ultron", "Valkyrie", "Venom", "Viper", "Vision", "Vulture", "War Machine", "Warpath", "Wasp", "Wave", "Werewolf By Night", "White Queen", "White Tiger", "Wolfsbane", "Wolverine", "Wong", "X-23", "Yellowjacket", "Yondu", "Zabu", "Zero",
+            "White Widow", "Valentina", "Blink", "Nocturne", "Namora", "Sage", "Sasquatch", "Gilgamesh", "Thena", "Sersi", "Makkari", "Phastos", "Arishem",
+"Gwenpool", "Hydra Bob", "Ajax", "Copycat", "Cassandra Nova", "Kate Bishop", "Marvel Boy", "Speed", "Wiccan", "Hulkling", "Symbiote Spider-Man", "Silver Sable", "Madame Web", "Arana", "Scarlet Spider", "Agent Venom", "Scream", "Misery", "Toxin", "Scorn"
+        ];
+
+        const twos = [
+            "Angela",
+            "Armor",
+            "Baron Mordo",
+            "Beast",
+            "Bucky Barnes",
+            "Cable",
+            "Carnage",
+            "Cloak",
+            "Colleen Wing",
+            "Colossus",
+            "Dagger",
+            "Daredevil",
+            "Dazzler",
+            "Doctor Strange",
+            "Domino",
+            "Falcon",
+            "Forge",
+            "Goose",
+            "Grand Master",
+            "Havok",
+            "Hazmat",
+            "Hulkbuster",
+            "Invisible Woman",
+            "Jeff",
+            "Kingpin",
+            "Kraven",
+            "Lizard",
+            "Master Mold",
+            "Maximus",
+            "Medusa",
+            "Mirage",
+            "Mr. Sinister", "Black Swan"
+        ];
+        const fours = [
+            "Absorbing Man",
+            "Attuma",
+            "Beta Ray Bill",
+            "Black Cat",
+            "Captain Marvel",
+            "Crossbones",
+            "Cull Obsidian",
+            "Dracula",
+            "Drax",
+            "Enchantress",
+            "Ghost Rider",
+            "Hellcow",
+            "Hercules",
+            "High Evolutionary",
+            "Iron Lad",
+            "Jessica Jones",
+            "Jubilee",
+            "Ka-Zar",
+            "Lockjaw",
+            "Loki",
+            "Man-Thing",
+            "Miles Morales",
+            "Mr. Negative",
+            "Moon Girl",
+            "Ms. Marvel",
+            "Namor",
+            "Nick Fury",
+            "Omega Red",
+            "The Phoenix Force",
+            "Proxima Midnight",
+            "Rescue",
+            "Sentry",
+		"Gwenpool", 
+		"Leech", "Wiccan", "Symbiote Spider-Man", "Scarlet Spider", "Misery"
+        ];
+        const fives = [
+            "Abomination",
+            "Adam Warlock",
+            "Aero",
+            "Annihilus",
+            "Black Bolt",
+            "Black Panther",
+            "Blue Marvel",
+            "Cannonball",
+            "Darkhawk",
+            "Devil Dinosaur",
+            "Doctor Octopus",
+            "Gamora",
+            "Hobgoblin",
+            "Iron Man",
+            "Jane Foster",
+            "Kang",
+            "Klaw",
+            "Lady Deathstrike",
+            "Legion",
+            "M.o.d.o.k.",
+
+            "Nimrod",
+            "Professor X",
+            "Red Skull",
+            "Ronan",
+            "Sandman",
+            "Sera",
+            "Spider-Man 2099",
+            "Spider-Woman",
+            "Stature",
+            "Taskmaster",
+            "Blink",
+            "Namora",
+            "Gilgamesh",
+            "Sersi",
+		"Ajax",
+
+        ];
+        const sixes = [
+            "Agatha Harkness",
+            "Alioth",
+            "Apocalypse",
+            "Arnim Zola",
+            "Blob",
+            "Destroyer",
+            "Dr Doom",
+            "Galactus",
+            "Giganto",
+            "Heimdall",
+            "Hela",
+            "Helicarrier",
+            "Hulk",
+            "Knull",
+            "Leader",
+            "Magneto",
+            "Odin",
+            "Onslaught",
+            "Orka",
+            "Red Hulk",
+            "She-Hulk",
+            "Skaar",
+            "Spectrum",
+            "Thanos",
+            "Infinaut",
+            "Living Tribunal",
+            "Ultron",
+            "Sasquatch",            
+"Mockingbird", "Hulkling"
+        ];
+
+        const locations = {
+            "rare": [
+                "altar of death",
+                "bar with no name",
+                "black vortex",
+                "castle zemo",
+                "collapsed mine",
+                "crown city",
+                "deep space",
+                "great web",
+                "luke's bar",
+                // "milano",
+                "morag",
+                "mount vesuvius",
+                "new york",
+                "noor dimension",
+                "olympia",
+                // "plunder castle",
+                "quantum tunnel",
+                "rickety bridge",
+                "tarnax iv",
+                "the peak",
+                "the sacred timeline",
+                "the sandbar",
+                "the triskelion",
+                "tva",
+                "utopia",
+                "valley of the hand",
+                "warrior falls",
+                "weirdworld", "otto's lab", "brooklyn bridge", "eternals' ark", "weapon x facility"
+            ],
+            "common": [
+                "asgard",
+                "asteroid m",
+                "atlantis",
+                "aunt may's",
+                "avengers compound",
+                "baxter building",
+                "castle blackstone",
+                "central park",
+                "cloning vats",
+                // "counter-earth",
+                "crimson cosmos",
+                // "crystal towers",
+                "daily bugle",
+                "danger room",
+                "dark dimension",
+                "dream dimension",
+                "elysium",
+                "eternity range",
+                "fisk tower",
+                //"genosha",
+                "hala",
+                "hellfire club",
+                "k'un-lun",
+                "kamar-taj",
+                "kyln",
+                "lake hellas",
+                "lemuria",
+                // "madripoor",
+                "miniaturized lab",
+                "mirror dimension",
+                "mojoworld",
+                "monster island",
+                "monster metropolis",
+                // "mother mold",
+                // "mt. wundagore",
+                "muir island",
+                "murderworld",
+                "necrosha",
+                "nidavellir",
+                "onslaught's citadel",
+                "pet mansion",
+                // "ruins",
+                "sakaar",
+                "savage land",
+                "sewer system",
+                // "shadowland",
+                "sinister london",
+                "sokovia",
+                "stark tower",
+                "strange academy",
+                "subterranea",
+                // "t.a.h.i.t.i.",
+                "the bifrost",
+                "the big house",
+                "the hub",
+                "the raft",
+                "the vault",
+                "tinkerer's workshop",
+                "titan",
+                "vibranium mines",
+                "wakanda",
+                "wakandan embassy",
+                "washington d.c.",
+                "westview",
+                "white hot room",
+                "white palace",
+                "x-mansion",
+                "xandar",
+                // "yashida base"
+            ],
+            "uncommon": [
+                "attilan",
+                "bar sinister",
+                "camp lehigh",
+                "death's domain",
+                "gamma lab",
+                "grand central",
+                "great portal",
+                "hell's kitchen",
+                "hotel inferno",
+                "isle of silence",
+                "jotunheim",
+                "klyntar",
+                "knowhere",
+                "krakoa",
+                "lechuguilla",
+                "limbo",
+                "los diablos base",
+                "machineworld",
+                "mindscape",
+                "negative zone",
+                "nova roma",
+                "orchis forge",
+                "oscorp tower",
+                "panoptichron",
+                // "pleasant hill",
+                "project pegasus",
+                "quantum realm",
+                "sanctum sanctorum",
+                "shuri's lab",
+                "starlight citadel",
+                "the abbey",
+                "the ice box",
+                "the nexus",
+                "the space throne",
+                "the superflow",
+                "throne room",
+                "thunderbolts tower",
+                "time theater",
+                // "transia",
+                "vormir", "destroyed mansion"
+            ],
+            "ultra-rare": [
+                "cancun",
+                "ego",
+                "fogwell's gym",
+                "worldship"
+            ]
+        };
+
+        function Regenerate() {
+            document.querySelector(".mull").innerHTML = "Opener";
+            document.querySelector(".t1").innerHTML = "Turn 1";
+            document.querySelector(".t2").innerHTML = "Turn 2";
+            document.querySelector(".t3").innerHTML = "Turn 3";            
+document.querySelector(".deck").innerHTML =
+                document.querySelector(".agent13 span").innerHTML =
+                document.querySelector(".maria span").innerHTML =
+                document.querySelector(".valentina span").innerHTML =
+                document.querySelector(".coulson span").innerHTML =
+                document.querySelector(".nickfury span").innerHTML =
+                "";
+            Generate();
+        }
+
+	function GetEnergy() {
+		const a = Math.floor(Math.random() * 4) + 2;
+		const b = a + Math.floor(Math.random() * 4) + 2;
+		const c = b + Math.floor(Math.random() * 4) + 2;
+		return [a, b, c];
+	}
+
+        function Generate() {
+            const temp = GetDeckFromText();
+            if (temp == null) {
+                alert("Deck is not 12 cards");
+                return;
+            }
+            const deck = temp;
+		shuffleArray(temp);
+            for (let i = 0; i < 3; i++) {
+                document.querySelector(".mull").insertAdjacentHTML("beforeend", "<img height='96' width='96' src='" + NameToURL(deck[i].trim(), deck[i][0] != ' ') + "'>");
+            }
+            for (let i = 3; i < 6; i++) {
+                document.querySelector(".t" + (i - 2)).insertAdjacentHTML("beforeend", "<img height='96' width='96' src='" + NameToURL(deck[i].trim(), deck[i][0] != ' ') + "'>");
+            }
+            for (let i = 6; i < 12; i++) {
+                document.querySelector(".deck").insertAdjacentHTML("beforeend", "<img height='80' width='80' src='" + NameToURL(deck[i].trim(), deck[i][0] != ' ') + "'>");
+            }
+            let cl = GenerateUniqueRandomNumbers(0, locations["common"].length, 3);
+            let ul = GenerateUniqueRandomNumbers(0, locations["uncommon"].length, 3);
+            let rl = GenerateUniqueRandomNumbers(0, locations["rare"].length, 3);
+            let url = GenerateUniqueRandomNumbers(0, locations["ultra-rare"].length, 3);
+            let weights = [locations["common"].length * 200,
+                locations["uncommon"].length * 125,
+                locations["rare"].length * 75,
+                locations["ultra-rare"].length * 15
+            ];
+            let rn = weights[0] + weights[1] + weights[2] + weights[3];
+            let rr = GenerateUniqueRandomNumbers(0, rn, 3);
+            for (let x = 0; x < 3; x++) {
+                let i = rr[x];
+                let location;
+                if (i < weights[0]) {
+                    location = locations["common"][cl[x]];
+                } else if (i < weights[0] + weights[1]) {
+                    location = locations["uncommon"][ul[x]];
+                } else if (i < weights[0] + weights[1] + weights[2]) {
+                    location = locations["rare"][rl[x]];
+                } else {
+                    location = locations["ultra-rare"][url[x]];
+                }
+                document.querySelector(".t" + (x + 1)).insertAdjacentHTML("beforeend", "<img height='128' width='128' class='location' alt='" + FixLocationName(location) + "'src='" + LocationNameToURL(location) + "'>");
+            };
+
+		let es = GetEnergy();
+		for (let x = 0; x < 3; x++) {
+			let e = es[x];
+			document.querySelector(".t" + (x + 1)).insertAdjacentHTML("beforeend", "<div class='e'>" + e + "</div>");
+		}
+
+            let thirteen = GetRandomCards(1)[0];
+            document.querySelector(".agent13 span").insertAdjacentHTML("beforeend", "<img height='80' width='80' src='" + NameToURL(thirteen, false) + "'>");
+
+            let maria = GenerateUniqueRandomNumbers(0, twos.length, 1)[0];
+            document.querySelector(".maria span").insertAdjacentHTML("beforeend", "<img height='80' width='80' src='" + NameToURL(twos[maria], false) + "'>");
+
+            let valentina = GenerateUniqueRandomNumbers(0, sixes.length, 1)[0];
+            document.querySelector(".valentina span").insertAdjacentHTML("beforeend", "<img height='80' width='80' src='" + NameToURL(sixes[valentina], false) + "'>");
+
+            let coulsonA = GenerateUniqueRandomNumbers(0, fours.length, 1)[0];
+            let coulsonB = GenerateUniqueRandomNumbers(0, fives.length, 1)[0]
+            document.querySelector(".coulson span").insertAdjacentHTML("beforeend", "<img height='80' width='80' src='" + NameToURL(fours[coulsonA], false) + "'>");
+            document.querySelector(".coulson span").insertAdjacentHTML("beforeend", "<img height='80' width='80' src='" + NameToURL(fives[coulsonB], false) + "'>");
+
+            let nick = GenerateUniqueRandomNumbers(0, sixes.length, 4);
+            for (let x = 0; x < 3; x++) {
+                let i = nick[x];
+                document.querySelector(".nickfury span").insertAdjacentHTML("beforeend", "<img height='80' width='80' src='" + NameToURL(sixes[i] === "Agatha Harkness" ? sixes[nick[3]] : sixes[i], false) + "'>");
+            }
+        }
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        function GetDeckFromText() {
+            const text = document.querySelector("#decklist").value.trim();
+            const lines = text.split(/\r?\n/);
+            if (lines.length < 12) {
+                return null;
+            }
+            const ret = [];
+            for (let i = 0; i < 12; i++) {
+                ret.push(ClosestCardName(lines[i], cards));
+            }
+            return ret;
+        }
+
+        function jaroDistance(s, t) {
+            if (s.length === 0 || t.length === 0) {
+                return 0;
+            }
+
+            const matchDistance = Math.floor(Math.max(s.length, t.length) / 2) - 1;
+            let sMatches = new Array(s.length).fill(false);
+            let tMatches = new Array(t.length).fill(false);
+
+            let matches = 0;
+            let transpositions = 0;
+
+            // Find matches
+            for (let i = 0; i < s.length; i++) {
+                const start = Math.max(0, i - matchDistance);
+                const end = Math.min(i + matchDistance + 1, t.length);
+
+                for (let j = start; j < end; j++) {
+                    if (tMatches[j]) continue;
+                    if (s[i] !== t[j]) continue;
+                    sMatches[i] = true;
+                    tMatches[j] = true;
+                    matches++;
+                    break;
+                }
+            }
+
+            if (matches === 0) return 0;
+
+            // Count transpositions
+            let k = 0;
+            for (let i = 0; i < s.length; i++) {
+                if (!sMatches[i]) continue;
+                while (!tMatches[k]) k++;
+                if (s[i] !== t[k]) transpositions++;
+                k++;
+            }
+
+            transpositions /= 2;
+
+            // Calculate Jaro distance
+            return (
+                (matches / s.length +
+                    matches / t.length +
+                    (matches - transpositions) / matches) / 3
+            );
+        }
+
+        function jaroWinklerDistance(s, t, scalingFactor = 0.1) {
+            const jaroDist = jaroDistance(s, t);
+            let prefixLength = 0;
+            const maxPrefixLength = 4; // Maximum prefix length to consider
+
+            for (let i = 0; i < Math.min(s.length, t.length); i++) {
+                if (s[i] !== t[i]) break;
+                prefixLength++;
+            }
+
+            prefixLength = Math.min(maxPrefixLength, prefixLength);
+            return jaroDist + (prefixLength * scalingFactor * (1 - jaroDist));
+        }
+
+        function ClosestCardName(target, candidates) {
+            let closest = candidates[0];
+            let minDistance = jaroWinklerDistance(target, closest);
+
+            for (let i = 1; i < candidates.length; i++) {
+                const dist = jaroWinklerDistance(target, candidates[i]);
+                if (dist > minDistance) {
+                    minDistance = dist;
+                    closest = candidates[i];
+                }
+            }
+
+            return closest;
+        }
+
+        function GetRandomCards(amount, prefix="") {
+            const ret = [];
+            let rands = GenerateUniqueRandomNumbers(0, cards.length, amount);
+            for (let i = 0; i < amount; i++) {
+                ret.push(prefix + cards[rands[i]]);
+            }
+            return ret;
+        }
+
+        function GenerateUniqueRandomNumbers(min, max, amount) {
+            const uniqueNumbers = new Set();
+            while (uniqueNumbers.size < amount) {
+                const randomNumber = Math.floor(Math.random() * (max - min)) + min;
+                uniqueNumbers.add(randomNumber);
+            }
+            return Array.from(uniqueNumbers);
+        }
+
+        function NameToURL(card, rare) {
+            return "https://static.marvelsnap.pro/cards/" + FixName(card) + (rare ? "-infinity.webp" : ".webp");
+        }
+
+        function FixName(card) {
+            return card.replaceAll('-', '').replaceAll(' ', '').replaceAll('.', '').replaceAll("'", "");
+        }
+
+        function LocationNameToURL(location) {
+            return "https://marvelsnapzone.com/wp-content/themes/blocksy-child/assets/media/cards/" + FixLocationName(location) + ".webp?v=182"
+        }
+
+        function FixLocationName(location) {
+            console.log(location);
+            return location.replaceAll(' ', '-').replaceAll("'", "").replaceAll('.', '');
+        }
+
+        Generate();
+
+    </script>
+</body>
